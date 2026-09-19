@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Virtual HIL Web Console</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>综合虚拟 HIL 测试台</h1>
+    <p>C17 命令行后端 + 本地 Web 控制台</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>运行测试</h2>
+      <label>配置文件
+        <input id="run-config" value="../virtual_hil/examples/default_config.ini">
+      </label>
+      <label>信号文件
+        <input id="run-signals" value="../virtual_hil/examples/signals.csv">
+      </label>
+      <label>测试脚本
+        <input id="run-script" value="../virtual_hil/examples/demo.hil">
+      </label>
+      <label>输出目录
+        <input id="run-out" value="data/out">
+      </label>
+      <label>语言
+        <select id="run-lang">
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      <button id="btn-run">运行测试</button>
+    </section>
+
+    <section class="panel">
+      <h2>按时间 / 信号查询</h2>
+      <label>CSV 文件
+        <input id="query-csv" value="data/out/run.csv">
+      </label>
+      <label>信号名
+        <input id="query-signal" value="engine_speed">
+      </label>
+      <label>开始时间 ms
+        <input id="query-from" type="number" value="0">
+      </label>
+      <label>结束时间 ms
+        <input id="query-to" type="number" value="4294967295">
+      </label>
+      <button id="btn-query">查询信号</button>
+    </section>
+
+    <section class="panel">
+      <h2>查看报告 / 文件</h2>
+      <label>文件路径
+        <input id="file-path" value="data/out/report.md">
+      </label>
+      <button id="btn-file">加载文件</button>
+    </section>
+
+    <section class="panel output-panel">
+      <h2>运行输出</h2>
+      <pre id="output">尚未运行。请先点击“运行测试”。</pre>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

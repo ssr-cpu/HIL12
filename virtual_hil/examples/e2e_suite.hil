@@ -1,0 +1,92 @@
+TEST power_up_normal
+SET throttle_position 20
+WAIT 300
+ASSERT engine_speed GT 800 1
+ASSERT battery_voltage EQ 12.5 0.01
+END
+
+TEST set_signal
+SET coolant_temp 55
+ASSERT coolant_temp EQ 55 0.01
+END
+
+TEST wait_and_periodic_task
+SET throttle_position 10
+WAIT 300
+ASSERT engine_speed GT 800 1
+ASSERT engine_speed LT 2000 1
+END
+
+TEST fault_stuck
+SET throttle_position 30
+WAIT 300
+FAULT engine_speed STUCK 1500 100
+WAIT 20
+ASSERT engine_speed EQ 1500 1
+WAIT 120
+ASSERT engine_speed GT 800 1
+RESET
+END
+
+TEST fault_offset
+SET throttle_position 20
+WAIT 300
+FAULT engine_speed OFFSET 500 100
+WAIT 20
+ASSERT engine_speed BETWEEN 2500 2600 5
+WAIT 120
+ASSERT engine_speed GT 800 1
+RESET
+END
+
+TEST fault_open_circuit
+SET coolant_temp 50
+FAULT coolant_temp OPEN_CIRCUIT
+WAIT 20
+ASSERT coolant_temp EQ 0 0.01
+RESET
+END
+
+TEST fault_dropout
+SET vehicle_speed 80
+FAULT vehicle_speed DROPOUT
+WAIT 20
+ASSERT vehicle_speed EQ 0 0.01
+RESET
+END
+
+TEST reset_system
+SET battery_voltage 15
+RESET
+ASSERT battery_voltage EQ 12.5 0.01
+END
+
+TEST signal_boundary_low
+SET engine_speed 0
+ASSERT engine_speed EQ 0 0.001
+END
+
+TEST signal_boundary_high
+SET engine_speed 8000
+ASSERT engine_speed EQ 8000 0.001
+END
+
+TEST repeated_fault_injection
+SET throttle_position 25
+WAIT 300
+FAULT engine_speed STUCK 1200 50
+WAIT 20
+ASSERT engine_speed EQ 1200 1
+FAULT engine_speed OFFSET 100 50
+WAIT 20
+ASSERT engine_speed BETWEEN 1300 2400 10
+RESET
+END
+
+TEST long_run_stability
+SET throttle_position 15
+WAIT 1000
+ASSERT engine_speed GT 800 1
+ASSERT engine_speed LT 3000 1
+RESET
+END

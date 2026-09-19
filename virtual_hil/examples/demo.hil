@@ -1,0 +1,17 @@
+TEST power_up_and_set
+SET throttle_position 25
+WAIT 300
+ASSERT engine_speed GT 800 1
+ASSERT battery_voltage EQ 12.5 0.01
+END
+
+TEST fault_stuck_and_recover
+SET throttle_position 30
+WAIT 300
+FAULT engine_speed STUCK 2000 100
+WAIT 20
+ASSERT engine_speed EQ 2000 1
+WAIT 120
+ASSERT engine_speed GT 800 1
+RESET
+END
