@@ -58,7 +58,6 @@ hil_status_t hil_data_logger_open(hil_data_logger_t *logger,
     logger->open = true;
     return HIL_OK;
 }
-
 hil_status_t hil_data_logger_log_sample(hil_data_logger_t *logger,
                                         uint64_t timestamp_ms,
                                         const hil_logger_t *app_logger)

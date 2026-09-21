@@ -28,6 +28,7 @@ hil_status_t hil_csv_writer_open(hil_csv_writer_t *writer, const char *path,
     return HIL_OK;
 }
 
+
 static hil_status_t write_field(FILE *fp, const char *field)
 {
     bool quoted = field_needs_quotes(field);

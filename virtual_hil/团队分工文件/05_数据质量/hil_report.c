@@ -19,6 +19,7 @@ const char *hil_report_status_name(hil_report_status_t status)
     return status_names[status];
 }
 
+
 void hil_report_init(hil_report_builder_t *report)
 {
     if (report == NULL) {

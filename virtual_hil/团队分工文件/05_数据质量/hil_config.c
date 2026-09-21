@@ -28,6 +28,7 @@ void hil_config_init(hil_config_t *config)
                   sizeof(config->report_file) - 1U);
 }
 
+
 hil_status_t hil_config_set_default_paths(hil_config_t *config,
                                          const char *output_dir)
 {
