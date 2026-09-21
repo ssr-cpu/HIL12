@@ -175,7 +175,6 @@ hil_status_t hil_signal_registry_set(hil_signal_registry_t *registry,
     signal->raw_value = value;
     return HIL_OK;
 }
-
 hil_status_t hil_signal_registry_set_valid(hil_signal_registry_t *registry,
                                            const char *name, bool valid)
 {

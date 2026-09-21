@@ -211,7 +211,6 @@ hil_status_t hil_ecu_set_comm_fault(hil_ecu_t *ecu, bool present,
     }
     return HIL_OK;
 }
-
 hil_status_t hil_ecu_latch_fault(hil_ecu_t *ecu, const hil_virtual_time_t *time,
                                  const hil_logger_t *logger)
 {
