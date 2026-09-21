@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 #include "hil_common.h"
-
 typedef struct hil_virtual_time {
     uint64_t now_ms;
 } hil_virtual_time_t;
