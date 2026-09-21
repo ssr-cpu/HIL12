@@ -2,7 +2,7 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h> 
 
 static const char *const fault_type_names[] = {
     [HIL_FAULT_NONE] = "NONE",
