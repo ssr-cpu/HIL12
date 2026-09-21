@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h> 
 
 static const char *const step_type_names[] = {
     [HIL_STEP_NONE] = "NONE",
