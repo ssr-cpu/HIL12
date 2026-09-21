@@ -1,0 +1,47 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc.exe 生成活动文件",
+            "command": "D:\\msys64\\ucrt64\\bin\\gcc.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "-finput-charset=UTF-8",
+                "-fexec-charset=UTF-8",
+                "-I", "${workspaceFolder}/include",
+                "${workspaceFolder}/src/hil_assert.c",
+                "${workspaceFolder}/src/hil_bus.c",
+                "${workspaceFolder}/src/hil_cli.c",
+                "${workspaceFolder}/src/hil_common.c",
+                "${workspaceFolder}/src/hil_config.c",
+                "${workspaceFolder}/src/hil_csv.c",
+                "${workspaceFolder}/src/hil_data_logger.c",
+                "${workspaceFolder}/src/hil_ecu.c",
+                "${workspaceFolder}/src/hil_executor.c",
+                "${workspaceFolder}/src/hil_fault.c",
+                "${workspaceFolder}/src/hil_frame.c",
+                "${workspaceFolder}/src/hil_logger.c",
+                "${workspaceFolder}/src/hil_report.c",
+                "${workspaceFolder}/src/hil_script.c",
+                "${workspaceFolder}/src/hil_signal.c",
+                "${workspaceFolder}/src/hil_time.c",
+                "${workspaceFolder}/src/main.c",
+                "-o",
+                "${workspaceFolder}/src/main.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "编译所有源文件"
+        }
+    ],
+    "version": "2.0.0"
+}
