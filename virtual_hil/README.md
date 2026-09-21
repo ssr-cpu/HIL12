@@ -81,8 +81,12 @@ ctest --test-dir build/cmake
 | 5 数据质量 | csv、data_logger、report、config | [05](docs/roles/05_data_quality_developer.md) |
 | 6 测试经理 | tests、构建、Sanitizer、交付文档 | [06](docs/roles/06_test_manager.md) |
 
+按人查看文件：见 [团队分工文件](团队分工文件/README.md)。
+
 ## 测试概况
 
 当前自动化测试共 34 项，全部通过，覆盖正常、边界、异常、故障注入和端到端流程。测试入口是 `tests/test_main.c`，其中包含 12 个端到端用例。
 
 详细测试结果见 [docs/test_report.md](docs/test_report.md)。
+
+答辩前快速上手请看 [docs/答辩使用文档.md](答辩使用文档.md)。
