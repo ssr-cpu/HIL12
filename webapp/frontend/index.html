@@ -7,62 +7,98 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <header>
-    <h1>综合虚拟 HIL 测试台</h1>
-    <p>C17 命令行后端 + 本地 Web 控制台</p>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">VIRTUAL HIL CONSOLE</p>
+      <h1>综合虚拟 HIL 测试台</h1>
+    </div>
+    <div class="hero-badge">本地运行</div>
   </header>
 
   <main>
+    <section class="panel guide-panel">
+      <details open>
+        <summary>新手使用说明</summary>
+        <ol>
+          <li>第一次使用请保持默认路径，直接点击“运行测试”。</li>
+          <li>运行成功后，输出目录会生成 <code>run.csv</code> 和 <code>report.md</code>。</li>
+          <li>点击“查看报告 / 文件”里的“加载文件”，就可以看到报告内容。</li>
+          <li>想看某个信号的历史值，使用“按时间 / 信号查询”。</li>
+          <li>把鼠标移到任何输入框或按钮上，会显示对应说明。</li>
+        </ol>
+      </details>
+    </section>
+
     <section class="panel">
-      <h2>运行测试</h2>
-      <label>配置文件
+      <h2><span class="icon">⚙️</span> 运行测试</h2>
+      <p class="help">填写要运行的测试文件，新手保持默认即可。</p>
+      <label data-tooltip="HIL 运行参数文件，例如 tick 周期、总线队列、ECU 超时。默认值已经可用。">
+        配置文件
         <input id="run-config" value="../virtual_hil/examples/default_config.ini">
       </label>
-      <label>信号文件
+      <label data-tooltip="定义有哪些信号、单位、最小值和最大值。默认文件包含 10 路信号。">
+        信号文件
         <input id="run-signals" value="../virtual_hil/examples/signals.csv">
       </label>
-      <label>测试脚本
+      <label data-tooltip="测试步骤脚本，支持 SET、WAIT、FAULT、ASSERT、RESET 等命令。">
+        测试脚本
         <input id="run-script" value="../virtual_hil/examples/demo.hil">
       </label>
-      <label>输出目录
+      <label data-tooltip="运行结果会保存在这里，包括 run.csv 和 report.md。">
+        输出目录
         <input id="run-out" value="data/out">
       </label>
-      <label>语言
+      <label data-tooltip="选择命令行输出语言，中文或英文。">
+        语言
         <select id="run-lang">
           <option value="zh">中文</option>
           <option value="en">English</option>
         </select>
       </label>
-      <button id="btn-run">运行测试</button>
+      <div class="button-row">
+        <button id="btn-run" data-tooltip="点击后调用 hil.exe 执行测试，并显示运行结果。" data-tooltip-pos="top">运行测试</button>
+        <button id="btn-reset-defaults" class="secondary" data-tooltip="把上方所有输入恢复为默认示例路径。" data-tooltip-pos="top">恢复默认值</button>
+      </div>
     </section>
 
     <section class="panel">
-      <h2>按时间 / 信号查询</h2>
-      <label>CSV 文件
+      <h2><span class="icon">🔎</span> 按时间 / 信号查询</h2>
+      <p class="help">从已经生成的 CSV 里查询某个信号在某段时间内的值。</p>
+      <label data-tooltip="要查询的 CSV 文件路径，通常是 data/out/run.csv。">
+        CSV 文件
         <input id="query-csv" value="data/out/run.csv">
       </label>
-      <label>信号名
+      <label data-tooltip="要查询的信号名称，例如 engine_speed、vehicle_speed。">
+        信号名
         <input id="query-signal" value="engine_speed">
       </label>
-      <label>开始时间 ms
+      <label data-tooltip="查询开始时间，单位是毫秒。0 表示从最前面开始。">
+        开始时间 ms
         <input id="query-from" type="number" value="0">
       </label>
-      <label>结束时间 ms
+      <label data-tooltip="查询结束时间，单位是毫秒。保持大数字即可查询到末尾。">
+        结束时间 ms
         <input id="query-to" type="number" value="4294967295">
       </label>
-      <button id="btn-query">查询信号</button>
+      <div class="button-row">
+        <button id="btn-query" data-tooltip="点击后显示该信号在指定时间范围内的数据。" data-tooltip-pos="top">查询信号</button>
+      </div>
     </section>
 
     <section class="panel">
-      <h2>查看报告 / 文件</h2>
-      <label>文件路径
+      <h2><span class="icon">📄</span> 查看报告 / 文件</h2>
+      <p class="help">查看运行后生成的报告或 CSV 文件。</p>
+      <label data-tooltip="输入要查看的文件路径，例如 data/out/report.md。">
+        文件路径
         <input id="file-path" value="data/out/report.md">
       </label>
-      <button id="btn-file">加载文件</button>
+      <div class="button-row">
+        <button id="btn-file" data-tooltip="点击后读取并显示该文件内容。" data-tooltip-pos="top">加载文件</button>
+      </div>
     </section>
 
     <section class="panel output-panel">
-      <h2>运行输出</h2>
+      <h2><span class="icon">🧾</span> 运行输出</h2>
       <pre id="output">尚未运行。请先点击“运行测试”。</pre>
     </section>
   </main>

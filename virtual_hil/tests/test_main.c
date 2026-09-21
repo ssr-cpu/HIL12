@@ -391,6 +391,108 @@ static void test_fault_remove(void)
     hil_fault_manager_deinit(&manager);
 }
 
+static void test_ecu_comm_timeout_and_power_off(void)
+{
+    hil_virtual_time_t time;
+    hil_signal_registry_t registry;
+    hil_ecu_t ecu;
+    unsigned int i;
+
+    hil_time_init(&time);
+    hil_signal_registry_init(&registry);
+    hil_ecu_init(&ecu, &time, 10U, 50U, 30U, 10U);
+    CHECK_STATUS(hil_ecu_power_on(&ecu, &time, &silent_logger), HIL_OK);
+    CHECK_STATUS(hil_ecu_set_comm_fault(&ecu, true, &time, &silent_logger),
+                 HIL_OK);
+
+    for (i = 0U; i <= 12U; i++) {
+        CHECK_STATUS(hil_time_advance(&time, 10U), HIL_OK);
+        CHECK_STATUS(hil_ecu_tick(&ecu, &time, &registry, &silent_logger),
+                     HIL_OK);
+        if (i == 6U) {
+            CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_STANDBY);
+        }
+    }
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_FAULT);
+
+    CHECK_STATUS(hil_ecu_clear_fault(&ecu, &time, &silent_logger), HIL_OK);
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_RECOVERY);
+    for (i = 0U; i < 22U; i++) {
+        CHECK_STATUS(hil_time_advance(&time, 10U), HIL_OK);
+        CHECK_STATUS(hil_ecu_tick(&ecu, &time, &registry, &silent_logger),
+                     HIL_OK);
+    }
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_RUN);
+    CHECK_STATUS(hil_ecu_power_off(&ecu, &time, &silent_logger), HIL_OK);
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_POWER_OFF);
+    hil_signal_registry_deinit(&registry);
+}
+
+static void test_ecu_latched_fault(void)
+{
+    hil_virtual_time_t time;
+    hil_signal_registry_t registry;
+    hil_ecu_t ecu;
+    unsigned int i;
+
+    hil_time_init(&time);
+    hil_signal_registry_init(&registry);
+    hil_ecu_init(&ecu, &time, 10U, 50U, 30U, 10U);
+    CHECK_STATUS(hil_ecu_power_on(&ecu, &time, &silent_logger), HIL_OK);
+    for (i = 0U; i < 18U; i++) {
+        CHECK_STATUS(hil_time_advance(&time, 10U), HIL_OK);
+        CHECK_STATUS(hil_ecu_tick(&ecu, &time, &registry, &silent_logger),
+                     HIL_OK);
+    }
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_RUN);
+    CHECK_STATUS(hil_ecu_latch_fault(&ecu, &time, &silent_logger), HIL_OK);
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_FAULT);
+    for (i = 0U; i < 6U; i++) {
+        CHECK_STATUS(hil_time_advance(&time, 10U), HIL_OK);
+        CHECK_STATUS(hil_ecu_tick(&ecu, &time, &registry, &silent_logger),
+                     HIL_OK);
+    }
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_FAULT);
+    CHECK_STATUS(hil_ecu_clear_fault(&ecu, &time, &silent_logger), HIL_OK);
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_RECOVERY);
+    hil_signal_registry_deinit(&registry);
+}
+
+static void test_data_logger_failure(void)
+{
+    hil_signal_registry_t registry;
+    hil_data_logger_t logger;
+    hil_signal_t signal;
+    hil_signal_registry_init(&registry);
+    hil_signal_init(&signal, "speed", "rpm", 0.0, 8000.0, 0.0);
+    (void)hil_signal_registry_add(&registry, &signal, &silent_logger);
+    CHECK(hil_data_logger_open(&logger, "build/missing_dir/run.csv",
+                               &registry, &silent_logger) != HIL_OK);
+    CHECK(!logger.open);
+    hil_signal_registry_deinit(&registry);
+}
+
+static void test_ecu_long_run(void)
+{
+    hil_virtual_time_t time;
+    hil_signal_registry_t registry;
+    hil_ecu_t ecu;
+    unsigned int i;
+
+    hil_time_init(&time);
+    hil_signal_registry_init(&registry);
+    hil_ecu_init(&ecu, &time, 10U, 50U, 30U, 10U);
+    CHECK_STATUS(hil_ecu_power_on(&ecu, &time, &silent_logger), HIL_OK);
+    for (i = 0U; i < 2000U; i++) {
+        CHECK_STATUS(hil_time_advance(&time, 10U), HIL_OK);
+        CHECK_STATUS(hil_ecu_tick(&ecu, &time, &registry, &silent_logger),
+                     HIL_OK);
+    }
+    CHECK(hil_ecu_get_state(&ecu) == HIL_ECU_RUN);
+    CHECK(hil_time_now(&time) == 20000U);
+    hil_signal_registry_deinit(&registry);
+}
+
 static void test_assert_pass_and_fail(void)
 {
     hil_assert_result_t result;
@@ -573,6 +675,11 @@ int main(void)
     run_test("fault_stuck", test_fault_stuck);
     run_test("fault_open_circuit", test_fault_open_circuit);
     run_test("fault_remove", test_fault_remove);
+    run_test("ecu_comm_timeout_and_power_off",
+             test_ecu_comm_timeout_and_power_off);
+    run_test("ecu_latched_fault", test_ecu_latched_fault);
+    run_test("data_logger_failure", test_data_logger_failure);
+    run_test("ecu_long_run", test_ecu_long_run);
     run_test("assert_pass_and_fail", test_assert_pass_and_fail);
     run_test("csv_roundtrip", test_csv_roundtrip);
     run_test("csv_malformed", test_csv_malformed);
