@@ -1,0 +1,66 @@
+﻿BUILD=0
+PASS status_names
+PASS parse_bool
+PASS parse_u64
+PASS parse_double
+PASS config_defaults
+PASS config_load_valid
+PASS config_load_invalid
+PASS time_advance
+PASS time_overflow
+PASS signal_add_find
+PASS signal_duplicate
+PASS signal_set_reset
+PASS signal_load_csv
+PASS frame_crc_and_payload
+PASS frame_encode_decode
+PASS frame_encode_overflow
+PASS frame_string_roundtrip
+PASS bus_publish_poll
+PASS bus_queue_full
+PASS bus_delay
+PASS bus_loss
+PASS bus_tamper
+PASS fault_stuck
+PASS fault_open_circuit
+PASS fault_remove
+PASS ecu_comm_timeout_and_power_off
+PASS ecu_latched_fault
+PASS data_logger_failure
+PASS ecu_long_run
+PASS assert_pass_and_fail
+PASS csv_roundtrip
+PASS csv_malformed
+PASS script_valid
+PASS script_unknown_command
+PASS script_missing_end
+PASS script_duplicate_case
+PASS script_ecu_commands
+PASS script_ecu_command_invalid
+PASS executor_ecu_fault_scenarios
+PASS report_builder
+timestamp_ms,engine_speed
+200,0
+210,0
+220,0
+230,0
+240,2040
+250,2040
+260,2040
+270,2040
+280,2040
+290,2040
+300,2040
+310,0
+320,0
+330,0
+340,0
+350,0
+360,0
+370,0
+380,0
+390,0
+400,0
+PASS executor_end_to_end
+Total: 41, Failed: 0
+TEST_EXIT=0

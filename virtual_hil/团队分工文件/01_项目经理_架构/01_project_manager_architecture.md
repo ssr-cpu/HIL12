@@ -34,4 +34,4 @@
 - `status_names`：错误码名称正确。
 - `parse_bool` / `parse_u64` / `parse_double`：合法与非法输入均被正确识别。
 - `time_advance` / `time_overflow`：虚拟时间和溢出路径。
-- `executor_end_to_end`：六模块集成的 12 个端到端用例全部通过。
+- `executor_end_to_end`：六模块集成的 15 个端到端用例全部通过。

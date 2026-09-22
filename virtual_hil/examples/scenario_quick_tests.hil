@@ -1,0 +1,23 @@
+TEST comm_timeout_and_power_off
+SET throttle_position 20
+WAIT 300
+COMM_FAULT ON
+WAIT 100
+ASSERT engine_speed EQ 0 1
+CLEAR_FAULT
+WAIT 250
+ASSERT engine_speed GE 800 1
+POWER_OFF
+ASSERT engine_speed EQ 0 1
+END
+
+TEST latched_fault
+SET throttle_position 20
+WAIT 300
+LATCH_FAULT
+WAIT 300
+ASSERT engine_speed EQ 0 1
+CLEAR_FAULT
+WAIT 250
+ASSERT engine_speed GE 800 1
+END

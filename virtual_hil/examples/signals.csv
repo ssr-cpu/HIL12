@@ -9,3 +9,5 @@ fuel_level,%,0,100,60
 oil_pressure,bar,0,8,1.2
 gear_position,,0,8,0
 ambient_temp,degC,-40,80,25
+ecu_state,,0,6,0
+ecu_fault_latched,,0,1,0

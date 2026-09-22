@@ -1,0 +1,5 @@
+TEST bus_faults
+SET throttle_position 20
+WAIT 300
+ASSERT engine_speed GT 800 1
+END

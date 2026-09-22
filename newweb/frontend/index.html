@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>综合虚拟 HIL 测试台 · Web 控制台</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="dot"></span>
+    <div>
+      <h1>综合虚拟 HIL 测试台</h1>
+      <p>C17 核心 · 虚拟 ECU / 总线 / 故障注入 / 脚本 / 记录 / 报告</p>
+    </div>
+  </div>
+  <div class="status-strip">
+    <div class="stat"><label>虚拟时间</label><strong id="stat-time">0 ms</strong></div>
+    <div class="stat"><label>ECU 状态</label><strong id="stat-state">POWER_OFF</strong></div>
+    <div class="stat"><label>锁存</label><strong id="stat-latched">否</strong></div>
+    <div class="stat"><label>总线</label><strong id="stat-bus">0 / 0</strong></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="bench">试验台</button>
+  <button class="tab" data-tab="script">脚本执行</button>
+  <button class="tab" data-tab="report">报告</button>
+  <button class="tab" data-tab="data">数据记录</button>
+  <button class="tab" data-tab="guide">需求验收</button>
+</nav>
+
+<main>
+  <!-- ============ 试验台 ============ -->
+  <section class="panel active" id="tab-bench">
+    <div class="grid">
+      <div class="card span-4">
+        <h2>ECU 状态机</h2>
+        <div class="state-chain" id="state-chain"></div>
+        <div class="kv">
+          <span>上电请求</span><b id="kv-power">-</b>
+          <span>通信故障</span><b id="kv-comm">-</b>
+          <span>恢复次数</span><b id="kv-recovery">0</b>
+        </div>
+      </div>
+
+      <div class="card span-4">
+        <h2>信号（<span id="signal-count">0</span> 路）</h2>
+        <div class="table-wrap tall">
+          <table class="table" id="signal-table">
+            <thead><tr><th>信号</th><th>值</th><th>单位</th><th>状态</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card span-4">
+        <h2>趋势曲线</h2>
+        <div class="chart-pick">
+          <select id="chart-signal"></select>
+          <button class="btn ghost" id="btn-refresh-chart">刷新</button>
+        </div>
+        <canvas id="chart" width="620" height="240"></canvas>
+        <p class="hint" id="chart-hint">采样点：0</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card span-4">
+        <h2>基础操作</h2>
+        <div class="form-row">
+          <label>设置信号</label>
+          <select id="set-signal"></select>
+          <input type="number" id="set-value" step="any" value="20">
+          <button class="btn" id="btn-set">SET</button>
+        </div>
+        <div class="form-row">
+          <label>推进时间</label>
+          <input type="number" id="wait-ms" min="1" step="1" value="100">
+          <span class="unit">ms</span>
+          <button class="btn" id="btn-wait">WAIT</button>
+        </div>
+        <div class="form-row">
+          <label>系统复位</label>
+          <button class="btn warn" id="btn-reset">RESET</button>
+          <button class="btn ghost" id="btn-clear-faults">清除信号故障</button>
+        </div>
+      </div>
+
+      <div class="card span-4">
+        <h2>信号级故障注入</h2>
+        <div class="form-row">
+          <label>目标信号</label>
+          <select id="fault-signal"></select>
+        </div>
+        <div class="form-row">
+          <label>故障类型</label>
+          <select id="fault-type">
+            <option value="OFFSET">OFFSET 偏置</option>
+            <option value="STUCK">STUCK 卡死</option>
+            <option value="NOISE">NOISE 噪声</option>
+            <option value="DROPOUT">DROPOUT 丢值</option>
+            <option value="OPEN_CIRCUIT">OPEN_CIRCUIT 断线</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>故障值</label>
+          <input type="number" id="fault-value" step="any" value="1500">
+        </div>
+        <div class="form-row">
+          <label>持续</label>
+          <input type="number" id="fault-duration" min="0" step="1" value="200">
+          <span class="unit">ms（0 = 一直生效）</span>
+        </div>
+        <div class="form-row">
+          <button class="btn danger" id="btn-inject">注入故障</button>
+        </div>
+        <p class="hint">DROPOUT / OPEN_CIRCUIT 会忽略故障值，把信号置 0 并标记无效。</p>
+        <p class="hint" style="color:#b45309"><b>注意：注入故障后看信号表，被影响的信号会变黄高亮、数值改变——这才是"故障生效"的证据。</b>注入动作本身返回"成功"是正常的。</p>
+      </div>
+
+      <div class="card span-4">
+        <h2>ECU 级故障与电源</h2>
+        <div class="btn-grid">
+          <button class="btn danger" data-ecufault="LATCH">FAULT ECU LATCH</button>
+          <button class="btn danger" data-ecufault="COMM">FAULT ECU COMM</button>
+          <button class="btn warn" data-ecufault="CLEAR">FAULT ECU CLEAR</button>
+          <button class="btn" data-power="ON">POWER ON</button>
+          <button class="btn warn" data-power="OFF">POWER OFF</button>
+        </div>
+        <p class="hint">LATCH 锁存后 ECU 停在 FAULT，WAIT 再久也不自愈，只能 CLEAR 或 RESET；COMM 是可恢复通信故障。</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card span-6">
+        <h2>活动故障</h2>
+        <div class="table-wrap">
+          <table class="table" id="fault-table">
+            <thead><tr><th>信号</th><th>类型</th><th>值</th><th>起始</th><th>结束</th><th>生效</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card span-6">
+        <h2>断言</h2>
+        <div class="form-row">
+          <label>信号</label>
+          <select id="assert-signal"></select>
+        </div>
+        <div class="form-row">
+          <label>算子</label>
+          <select id="assert-op">
+            <option>EQ</option><option>NE</option><option>LT</option>
+            <option>LE</option><option>GT</option><option>GE</option>
+          </select>
+          <input type="text" id="assert-value" value="0">
+          <span class="unit">期望值（可填 ECU 状态名）</span>
+        </div>
+        <div class="form-row">
+          <label>容差</label>
+          <input type="number" id="assert-tol" step="any" value="0.001">
+          <button class="btn" id="btn-assert">执行断言</button>
+        </div>
+        <div id="assert-result" class="assert-result"></div>
+        <p class="hint">期望值可填 ECU 状态名（如 FAULT、RUN）。PASS = 信号值与期望一致；FAIL = 不一致。</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card span-12">
+        <h2>虚拟总线</h2>
+        <div class="form-row">
+          <label>丢失率</label>
+          <input type="number" id="bus-loss" min="0" max="100" step="1" value="0">
+          <span class="unit">%</span>
+          <label>延迟</label>
+          <input type="number" id="bus-delay" min="0" step="1" value="0">
+          <span class="unit">ms</span>
+          <label>篡改</label>
+          <select id="bus-tamper"><option value="false">关闭</option><option value="true">开启</option></select>
+          <button class="btn" id="btn-bus-apply">应用</button>
+        </div>
+        <div class="kv wide">
+          <span>队列容量</span><b id="bus-capacity">0</b>
+          <span>队列深度</span><b id="bus-queued">0</b>
+          <span>已发布</span><b id="bus-published">0</b>
+          <span>已交付</span><b id="bus-delivered">0</b>
+          <span>已丢失</span><b id="bus-lost">0</b>
+          <span>已篡改</span><b id="bus-tampered">0</b>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 脚本 ============ -->
+  <section class="panel" id="tab-script">
+    <div class="grid">
+      <div class="card span-5">
+        <h2>测试脚本</h2>
+        <textarea id="script-text" spellcheck="false"></textarea>
+        <div class="form-row">
+          <button class="btn primary" id="btn-run-script">运行脚本</button>
+          <button class="btn ghost" id="btn-load-demo">载入示例</button>
+          <button class="btn ghost" id="btn-load-full">载入完整套件</button>
+        </div>
+        <p class="hint">命令：TEST / SET / WAIT / FAULT / ASSERT / RESET / POWER / END（大小写不敏感）</p>
+      </div>
+      <div class="card span-7">
+        <h2>执行结果</h2>
+        <div class="summary" id="script-summary"></div>
+        <div class="table-wrap tall">
+          <table class="table" id="script-table">
+            <thead><tr><th>用例</th><th>行</th><th>步骤</th><th>目标</th><th>期望</th><th>实际</th><th>结果</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 报告 ============ -->
+  <section class="panel" id="tab-report">
+    <div class="grid">
+      <div class="card span-12">
+        <h2>用例级 / 步骤级报告</h2>
+        <div class="summary" id="report-summary"></div>
+        <div class="table-wrap tall">
+          <table class="table" id="report-table">
+            <thead><tr><th>用例</th><th>行</th><th>步骤</th><th>目标</th><th>期望</th><th>实际</th><th>结果</th><th>消息</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="form-row">
+          <button class="btn ghost" id="btn-load-report">读取最近一次报告</button>
+          <button class="btn ghost" id="btn-download-csv">下载 CSV</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 数据 ============ -->
+  <section class="panel" id="tab-data">
+    <div class="grid">
+      <div class="card span-12">
+        <h2>按时间 / 信号查询</h2>
+        <div class="form-row">
+          <label>信号</label>
+          <select id="query-signal"></select>
+          <label>起始</label>
+          <input type="number" id="query-from" min="0" step="1" value="0">
+          <label>结束</label>
+          <input type="number" id="query-to" min="0" step="1" value="100000">
+          <button class="btn" id="btn-query">查询</button>
+        </div>
+        <div class="table-wrap tall">
+          <table class="table" id="query-table">
+            <thead><tr><th>时间 (ms)</th><th>值</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="hint" id="query-hint">数据由 C 核心的 hil_data_logger 写入 CSV，同时保留内存环形缓冲供查询。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 需求验收 ============ -->
+  <section class="panel" id="tab-guide">
+    <div class="grid">
+      <div class="card span-12">
+        <h2>需求验收清单（点击"去验证"跳转到对应操作）</h2>
+        <div id="guide-list"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -589,6 +589,108 @@ static void test_script_duplicate_case(void)
     hil_script_deinit(&script);
 }
 
+static void test_script_ecu_commands(void)
+{
+    hil_script_t script;
+    hil_step_t *step;
+    hil_script_init(&script);
+    CHECK_STATUS(hil_script_load_text(&script,
+                                      "TEST ecu\nPOWER OFF\nFAULT ECU LATCH\n"
+                                      "FAULT ECU COMM\nFAULT ECU CLEAR\n"
+                                      "POWER ON\nASSERT ecu_state EQ FAULT "
+                                      "0.01\nEND\n",
+                                      &silent_logger),
+                 HIL_OK);
+    CHECK(script.cases->step_count == 7U);
+    step = script.cases->steps;
+    CHECK(step != NULL);
+    CHECK(step->type == HIL_STEP_POWER);
+    CHECK(!step->power_on);
+    step = step->next;
+    CHECK(step != NULL);
+    CHECK(step->type == HIL_STEP_FAULT);
+    CHECK(step->ecu_fault == HIL_ECU_FAULT_LATCH);
+    step = step->next;
+    CHECK(step != NULL);
+    CHECK(step->ecu_fault == HIL_ECU_FAULT_COMM);
+    step = step->next;
+    CHECK(step != NULL);
+    CHECK(step->ecu_fault == HIL_ECU_FAULT_CLEAR);
+    step = step->next;
+    CHECK(step != NULL);
+    CHECK(step->type == HIL_STEP_POWER);
+    CHECK(step->power_on);
+    step = step->next;
+    CHECK(step != NULL);
+    CHECK(step->type == HIL_STEP_ASSERT);
+    CHECK(step->value == (double)HIL_ECU_FAULT);
+    hil_script_deinit(&script);
+}
+
+static void test_script_ecu_command_invalid(void)
+{
+    hil_script_t script;
+    hil_script_init(&script);
+    CHECK(hil_script_load_text(&script, "TEST d\nFAULT ECU BOGUS\nEND\n",
+                               &silent_logger) != HIL_OK);
+    hil_script_deinit(&script);
+    hil_script_init(&script);
+    CHECK(hil_script_load_text(&script, "TEST d\nPOWER SIDEWAYS\nEND\n",
+                               &silent_logger) != HIL_OK);
+    hil_script_deinit(&script);
+    hil_script_init(&script);
+    CHECK(hil_script_load_text(&script, "TEST d\nPOWER\nEND\n",
+                               &silent_logger) != HIL_OK);
+    hil_script_deinit(&script);
+}
+
+static void test_executor_ecu_fault_scenarios(void)
+{
+    hil_config_t config;
+    hil_signal_registry_t signals;
+    hil_report_builder_t report;
+    hil_executor_t executor;
+    FILE *fp;
+
+    fp = fopen("build/test_ecu_fault.hil", "wb");
+    CHECK(fp != NULL);
+    (void)fputs("TEST latch\nWAIT 300\nFAULT ECU LATCH\nWAIT 1000\n"
+                "ASSERT ecu_state EQ FAULT 0.01\n"
+                "ASSERT ecu_fault_latched EQ 1 0.01\n"
+                "ASSERT engine_speed EQ 0 0.01\n"
+                "FAULT ECU CLEAR\nASSERT ecu_state EQ RECOVERY 0.01\n"
+                "ASSERT ecu_fault_latched EQ 0 0.01\nEND\n"
+                "TEST power\nWAIT 300\nPOWER OFF\n"
+                "ASSERT ecu_state EQ POWER_OFF 0.01\n"
+                "ASSERT engine_speed EQ 0 0.01\nPOWER ON\nWAIT 300\n"
+                "ASSERT ecu_state EQ RUN 0.01\nEND\n"
+                "TEST comm\nWAIT 300\nFAULT ECU COMM\n"
+                "ASSERT ecu_state EQ FAULT 0.01\nFAULT ECU CLEAR\n"
+                "ASSERT ecu_state EQ RECOVERY 0.01\nWAIT 300\n"
+                "ASSERT ecu_state EQ RUN 0.01\nEND\n",
+                fp);
+    (void)fclose(fp);
+
+    hil_config_init(&config);
+    config.tick_ms = 10U;
+    hil_signal_registry_init(&signals);
+    CHECK_STATUS(hil_signal_registry_load_csv(&signals, "examples/signals.csv",
+                                              &silent_logger),
+                 HIL_OK);
+    hil_report_init(&report);
+    CHECK_STATUS(hil_executor_init(&executor, &config, &signals,
+                                   "build/test_ecu_fault.hil", NULL, &report,
+                                   &silent_logger),
+                 HIL_OK);
+    CHECK(executor.script.case_count == 3U);
+    CHECK_STATUS(hil_executor_run(&executor, &silent_logger), HIL_OK);
+    hil_executor_deinit(&executor);
+    CHECK(hil_report_all_passed(&report));
+    hil_report_deinit(&report);
+    hil_signal_registry_deinit(&signals);
+    (void)remove("build/test_ecu_fault.hil");
+}
+
 static void test_report_builder(void)
 {
     hil_report_builder_t report;
@@ -630,7 +732,7 @@ static void test_executor_end_to_end(void)
                                    "examples/e2e_suite.hil", &logger, &report,
                                    &silent_logger),
                  HIL_OK);
-    CHECK(executor.script.case_count == 12U);
+    CHECK(executor.script.case_count == 15U);
     CHECK_STATUS(hil_executor_run(&executor, &silent_logger), HIL_OK);
     hil_executor_deinit(&executor);
     CHECK_STATUS(hil_data_logger_close(&logger, &silent_logger), HIL_OK);
@@ -687,6 +789,9 @@ int main(void)
     run_test("script_unknown_command", test_script_unknown_command);
     run_test("script_missing_end", test_script_missing_end);
     run_test("script_duplicate_case", test_script_duplicate_case);
+    run_test("script_ecu_commands", test_script_ecu_commands);
+    run_test("script_ecu_command_invalid", test_script_ecu_command_invalid);
+    run_test("executor_ecu_fault_scenarios", test_executor_ecu_fault_scenarios);
     run_test("report_builder", test_report_builder);
     run_test("executor_end_to_end", test_executor_end_to_end);
 

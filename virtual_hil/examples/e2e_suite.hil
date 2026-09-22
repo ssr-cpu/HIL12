@@ -90,3 +90,47 @@ ASSERT engine_speed GT 800 1
 ASSERT engine_speed LT 3000 1
 RESET
 END
+
+TEST power_off_and_restart
+SET throttle_position 20
+WAIT 300
+ASSERT ecu_state EQ RUN
+POWER OFF
+ASSERT ecu_state EQ POWER_OFF
+ASSERT engine_speed EQ 0 0.01
+POWER ON
+ASSERT ecu_state EQ INIT
+SET throttle_position 20
+WAIT 300
+ASSERT ecu_state EQ RUN
+ASSERT engine_speed GT 800 1
+END
+
+TEST comm_timeout_recoverable
+SET throttle_position 20
+WAIT 300
+ASSERT ecu_state EQ RUN
+FAULT ECU COMM
+ASSERT ecu_state EQ FAULT
+WAIT 20
+ASSERT engine_speed EQ 0 0.01
+FAULT ECU CLEAR
+ASSERT ecu_state EQ RECOVERY
+WAIT 300
+ASSERT ecu_state EQ RUN
+END
+
+TEST ecu_latched_fault
+SET throttle_position 20
+WAIT 300
+ASSERT ecu_state EQ RUN
+FAULT ECU LATCH
+ASSERT ecu_state EQ FAULT
+ASSERT ecu_fault_latched EQ 1 0.01
+WAIT 1000
+ASSERT ecu_state EQ FAULT
+ASSERT engine_speed EQ 0 0.01
+FAULT ECU CLEAR
+ASSERT ecu_state EQ RECOVERY
+ASSERT ecu_fault_latched EQ 0 0.01
+END

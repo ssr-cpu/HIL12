@@ -16,7 +16,7 @@
 - Make：`make test`
 - CMake/CTest：`ctest --test-dir build/cmake`
 
-当前测试入口为 `tests/test_main.c`，共 34 项测试，覆盖正常、边界、异常、故障注入和 12 个端到端用例。
+当前测试入口为 `tests/test_main.c`，共 41 项测试，覆盖正常、边界、异常、故障注入、断电、锁存故障和 15 个端到端用例。
 
 ## Sanitizer
 

@@ -15,6 +15,8 @@
 
 `battery_voltage`、`engine_speed`、`vehicle_speed`、`coolant_temp`、`throttle_position`、`brake_pressure`、`fuel_level`、`oil_pressure`、`gear_position`、`ambient_temp`。
 
+另有两路 ECU 状态镜像信号（每 tick 由 `publish_ecu_status()` 刷新，只写不读）：`ecu_state`（0=POWER_OFF … 6=RECOVERY）、`ecu_fault_latched`（0/1）。它们让测试脚本可以直接断言 ECU 内部状态。
+
 ## ECU 状态机
 
 状态：`POWER_OFF`、`INIT`、`SELF_TEST`、`STANDBY`、`RUN`、`FAULT`、`RECOVERY`。
@@ -25,6 +27,8 @@
 - `hil_ecu_latch_fault()` 锁存故障。
 - `hil_ecu_clear_fault()` / `hil_ecu_reset()` 清除故障或复位。
 - `hil_ecu_apply_safe_outputs()` 在断电/故障时输出安全值。
+
+脚本层入口：`POWER ON|OFF` 调用 `hil_ecu_power_on/off()`，`FAULT ECU LATCH|COMM|CLEAR` 分别调用 `hil_ecu_latch_fault()`、`hil_ecu_set_comm_fault()`、`hil_ecu_clear_fault()`。锁存后 `hil_ecu_tick()` 不再自动进入 `RECOVERY`，只能靠 `CLEAR` 或 `RESET` 解除。
 
 ## 周期任务
 

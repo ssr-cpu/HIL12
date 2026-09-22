@@ -1,0 +1,245 @@
+﻿hil_tests.exe : FAIL F:\c\12\virtual_hil\tests\test_main.c:604: script.cases->s
+tep_count == 6U
+所在位置 行:451 字符: 121
++ ... -ErrorAction SilentlyContinue; & '.\build\hil_tests.exe' 2>&1 | Out-F ...
++                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL F:\c\12\vi...tep_count == 6U 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+FAIL F:\c\12\virtual_hil\tests\test_main.c:739: hil_report_all_passed(&report)
+PASS status_names
+PASS parse_bool
+PASS parse_u64
+PASS parse_double
+PASS config_defaults
+PASS config_load_valid
+PASS config_load_invalid
+PASS time_advance
+PASS time_overflow
+PASS signal_add_find
+PASS signal_duplicate
+PASS signal_set_reset
+PASS signal_load_csv
+PASS frame_crc_and_payload
+PASS frame_encode_decode
+PASS frame_encode_overflow
+PASS frame_string_roundtrip
+PASS bus_publish_poll
+PASS bus_queue_full
+PASS bus_delay
+PASS bus_loss
+PASS bus_tamper
+PASS fault_stuck
+PASS fault_open_circuit
+PASS fault_remove
+PASS ecu_comm_timeout_and_power_off
+PASS ecu_latched_fault
+PASS data_logger_failure
+PASS ecu_long_run
+PASS assert_pass_and_fail
+PASS csv_roundtrip
+PASS csv_malformed
+PASS script_valid
+PASS script_unknown_command
+PASS script_missing_end
+PASS script_duplicate_case
+FAIL script_ecu_commands
+PASS script_ecu_command_invalid
+PASS executor_ecu_fault_scenarios
+PASS report_builder
+FAIL executor_end_to_end
+Total: 41, Failed: 2
+TEST_EXIT=1
+hil.exe : [INFO] [ecu] POWER_OFF -> INIT at 0 ms
+所在位置 行:451 字符: 250
++ ... oding utf8; & '.\build\hil.exe' run --config examples\default_config. ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([INFO] [ecu] POWER_OFF -> INIT at 
+    0 ms:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[INFO] [executor] start test case 'power_up_normal'
+[INFO] [ecu] INIT -> SELF_TEST at 80 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 140 ms
+[INFO] [ecu] STANDBY -> RUN at 240 ms
+[INFO] [ecu] RUN -> INIT at 300 ms
+[INFO] [executor] start test case 'set_signal'
+[INFO] [ecu] INIT -> INIT at 300 ms
+[INFO] [executor] start test case 'wait_and_periodic_task'
+[INFO] [ecu] INIT -> SELF_TEST at 380 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 440 ms
+[INFO] [ecu] STANDBY -> RUN at 540 ms
+[INFO] [ecu] RUN -> INIT at 600 ms
+[INFO] [executor] start test case 'fault_stuck'
+[INFO] [ecu] INIT -> SELF_TEST at 680 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 740 ms
+[INFO] [ecu] STANDBY -> RUN at 840 ms
+[INFO] [ecu] RUN -> INIT at 1040 ms
+[INFO] [ecu] INIT -> INIT at 1040 ms
+[INFO] [executor] start test case 'fault_offset'
+[INFO] [ecu] INIT -> SELF_TEST at 1120 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 1180 ms
+[INFO] [ecu] STANDBY -> RUN at 1280 ms
+[INFO] [ecu] RUN -> INIT at 1480 ms
+[INFO] [ecu] INIT -> INIT at 1480 ms
+[INFO] [executor] start test case 'fault_open_circuit'
+[INFO] [ecu] INIT -> INIT at 1500 ms
+[INFO] [ecu] INIT -> INIT at 1500 ms
+[INFO] [executor] start test case 'fault_dropout'
+[INFO] [ecu] INIT -> INIT at 1520 ms
+[INFO] [ecu] INIT -> INIT at 1520 ms
+[INFO] [executor] start test case 'reset_system'
+[INFO] [ecu] INIT -> INIT at 1520 ms
+[INFO] [ecu] INIT -> INIT at 1520 ms
+[INFO] [executor] start test case 'signal_boundary_low'
+[INFO] [ecu] INIT -> INIT at 1520 ms
+[INFO] [executor] start test case 'signal_boundary_high'
+[INFO] [ecu] INIT -> INIT at 1520 ms
+[INFO] [executor] start test case 'repeated_fault_injection'
+[INFO] [ecu] INIT -> SELF_TEST at 1600 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 1660 ms
+[INFO] [ecu] STANDBY -> RUN at 1760 ms
+[INFO] [ecu] RUN -> INIT at 1860 ms
+[INFO] [ecu] INIT -> INIT at 1860 ms
+[INFO] [executor] start test case 'long_run_stability'
+[INFO] [ecu] INIT -> SELF_TEST at 1940 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 2000 ms
+[INFO] [ecu] STANDBY -> RUN at 2100 ms
+[INFO] [ecu] RUN -> INIT at 2860 ms
+[INFO] [ecu] INIT -> INIT at 2860 ms
+[INFO] [executor] start test case 'power_off_and_restart'
+[INFO] [ecu] INIT -> SELF_TEST at 2940 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 3000 ms
+[INFO] [ecu] STANDBY -> RUN at 3100 ms
+[INFO] [ecu] RUN -> POWER_OFF at 3160 ms
+[WARN] [ecu] safe outputs applied in POWER_OFF state
+[INFO] [ecu] POWER_OFF -> INIT at 3160 ms
+[INFO] [ecu] INIT -> SELF_TEST at 3240 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 3300 ms
+[INFO] [ecu] STANDBY -> RUN at 3400 ms
+[ERROR] [executor] step at line 105 failed: ASSERT
+[INFO] [ecu] RUN -> INIT at 3460 ms
+[INFO] [executor] start test case 'comm_timeout_recoverable'
+[INFO] [ecu] INIT -> SELF_TEST at 3540 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 3600 ms
+[INFO] [ecu] STANDBY -> RUN at 3700 ms
+[WARN] [ecu] communication fault active
+[INFO] [ecu] RUN -> FAULT at 3760 ms
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[INFO] [ecu] FAULT -> RECOVERY at 3780 ms
+[INFO] [ecu] RECOVERY -> STANDBY at 3880 ms
+[INFO] [ecu] STANDBY -> RUN at 3980 ms
+[INFO] [ecu] RUN -> INIT at 4080 ms
+[INFO] [executor] start test case 'ecu_latched_fault'
+[INFO] [ecu] INIT -> SELF_TEST at 4160 ms
+[INFO] [ecu] SELF_TEST -> STANDBY at 4220 ms
+[INFO] [ecu] STANDBY -> RUN at 4320 ms
+[INFO] [ecu] RUN -> FAULT at 4380 ms
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[WARN] [ecu] safe outputs applied in FAULT state
+[INFO] [ecu] FAULT -> RECOVERY at 5380 ms
+[ERROR] [main] operation failed: ASSERT
+passed: 105, failed: 1, skipped: 0, errors: 0
+RUN_EXIT=1

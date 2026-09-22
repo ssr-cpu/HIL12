@@ -7,7 +7,8 @@
 - 虚拟 ECU：`POWER_OFF / INIT / SELF_TEST / STANDBY / RUN / FAULT / RECOVERY` 状态机，周期任务，故障安全输出。
 - 10 路信号：电池电压、转速、车速、水温、油门、制动压力、燃油、机油压力、挡位、环境温度。
 - 虚拟总线：帧队列、帧编码/解码、CRC、丢失、延迟、篡改。
-- 测试脚本：`TEST / SET / WAIT / FAULT / ASSERT / RESET / END`。
+- 测试脚本：`TEST / SET / WAIT / FAULT / ASSERT / RESET / POWER / END`。
+- 故障注入两层：信号级 `OFFSET/STUCK/NOISE/DROPOUT/OPEN_CIRCUIT`，ECU 级 `FAULT ECU LATCH|COMM|CLEAR` 与 `POWER ON|OFF`。
 - 数据记录：CSV 写入、按时间和信号查询。
 - 报告：用例级和步骤级 Markdown 报告。
 - 统一配置、错误码、日志，以及 Makefile、CMake、PowerShell 构建脚本。
@@ -85,7 +86,32 @@ ctest --test-dir build/cmake
 
 ## 测试概况
 
-当前自动化测试共 38 项，全部通过，覆盖正常、边界、异常、故障注入、通信超时、断电、锁存故障、日志失败、长时间运行和端到端流程。测试入口是 `tests/test_main.c`，其中包含 12 个端到端用例。
+当前自动化测试共 41 项，全部通过，覆盖正常、边界、异常、故障注入、通信超时、断电、锁存故障、日志失败、长时间运行和端到端流程。测试入口是 `tests/test_main.c`，`examples/e2e_suite.hil` 提供 15 个端到端用例（107 个步骤）。
+
+脚本层注入 ECU 故障与断电的写法：
+
+```
+TEST ecu_latched_fault
+WAIT 300
+FAULT ECU LATCH          # 锁存故障，停在 FAULT 不再自动恢复
+ASSERT ecu_fault_latched EQ 1 0.01
+WAIT 1000
+ASSERT ecu_state EQ FAULT
+FAULT ECU CLEAR          # 手动清除后进入 RECOVERY
+ASSERT ecu_state EQ RECOVERY
+END
+
+TEST power_off_and_restart
+WAIT 300
+POWER OFF
+ASSERT ecu_state EQ POWER_OFF
+POWER ON
+WAIT 300
+ASSERT ecu_state EQ RUN
+END
+```
+
+`ecu_state` 与 `ecu_fault_latched` 是 ECU 每 tick 镜像出来的只读信号，取值见 `docs/file_format.md`。
 
 详细测试结果见 [docs/test_report.md](docs/test_report.md)。
 

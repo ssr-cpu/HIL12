@@ -4,15 +4,19 @@
 
 测试入口：`tests/test_main.c`。
 
-当前结果：34 项测试全部通过，0 失败。
+当前结果：41 项测试全部通过，0 失败。
 
 测试分类：
 
 - 正常：配置加载、信号注册、帧编解码、CSV 往返、报告生成。
 - 边界：信号边界、队列满、帧偏移溢出、时间溢出。
-- 异常：重复信号、未知脚本命令、缺少 END、损坏 CSV。
-- 故障注入：STUCK、OPEN_CIRCUIT、DROPOUT、总线丢失/延迟/篡改。
-- 端到端：`examples/e2e_suite.hil` 中 12 个用例通过。
+- 异常：重复信号、未知脚本命令、缺少 END、损坏 CSV、日志文件不可写。
+- 故障注入：STUCK、OPEN_CIRCUIT、DROPOUT、总线丢失/延迟/篡改、ECU 锁存与通信中断（脚本层）。
+- 状态与超时：通信超时、断电、锁存故障、长时间运行。
+- 脚本健壮性：`POWER`、`FAULT ECU` 的合法与非法写法。
+- 端到端：`examples/e2e_suite.hil` 中 15 个用例（107 个步骤）通过。
+
+回归记录：为修复"锁存故障与断电只能由单元测试触发、脚本不可达"这一缺陷，新增 `script_ecu_commands`、`script_ecu_command_invalid`、`executor_ecu_fault_scenarios` 三项测试，以及 `power_off_and_restart`、`comm_timeout_recoverable`、`ecu_latched_fault` 三个端到端用例。
 
 ## 复现命令
 

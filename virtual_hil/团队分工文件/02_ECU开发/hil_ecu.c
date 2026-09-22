@@ -20,6 +20,22 @@ const char *hil_ecu_state_name(hil_ecu_state_t state)
     return state_names[state];
 }
 
+bool hil_ecu_state_from_name(const char *name, hil_ecu_state_t *state)
+{
+    hil_ecu_state_t candidate;
+    if (name == NULL || state == NULL) {
+        return false;
+    }
+    for (candidate = HIL_ECU_POWER_OFF; candidate <= HIL_ECU_RECOVERY;
+         candidate = (hil_ecu_state_t)(candidate + 1)) {
+        if (strcmp(name, state_names[candidate]) == 0) {
+            *state = candidate;
+            return true;
+        }
+    }
+    return false;
+}
+
 void hil_ecu_init(hil_ecu_t *ecu, const hil_virtual_time_t *time,
                   uint64_t power_on_delay_ms, uint64_t comm_timeout_ms,
                   uint64_t recovery_delay_ms, uint64_t periodic_period_ms)
@@ -98,6 +114,9 @@ static hil_status_t transition_if_elapsed(hil_ecu_t *ecu,
     return HIL_OK;
 }
 
+static void publish_ecu_status(const hil_ecu_t *ecu,
+                               hil_signal_registry_t *signals);
+
 hil_status_t hil_ecu_tick(hil_ecu_t *ecu, const hil_virtual_time_t *time,
                           hil_signal_registry_t *signals,
                           const hil_logger_t *logger)
@@ -108,6 +127,7 @@ hil_status_t hil_ecu_tick(hil_ecu_t *ecu, const hil_virtual_time_t *time,
     }
     if (!ecu->power_requested) {
         hil_ecu_apply_safe_outputs(ecu, signals, logger);
+        publish_ecu_status(ecu, signals);
         return HIL_OK;
     }
 
@@ -185,6 +205,7 @@ hil_status_t hil_ecu_tick(hil_ecu_t *ecu, const hil_virtual_time_t *time,
     if (hil_ecu_has_safe_outputs(ecu)) {
         hil_ecu_apply_safe_outputs(ecu, signals, logger);
     }
+    publish_ecu_status(ecu, signals);
     return HIL_OK;
 }
 
@@ -310,6 +331,17 @@ hil_status_t hil_ecu_run_periodic_tasks(hil_ecu_t *ecu,
                     "periodic tasks executed at %llu ms, engine=%.2f rpm",
                     (unsigned long long)ecu->last_periodic_ms, engine_speed);
     return HIL_OK;
+}
+
+static void publish_ecu_status(const hil_ecu_t *ecu,
+                               hil_signal_registry_t *signals)
+{
+    if (ecu == NULL || signals == NULL) {
+        return;
+    }
+    set_base_value(signals, "ecu_state", (double)ecu->state);
+    set_base_value(signals, "ecu_fault_latched",
+                   ecu->fault_latched ? 1.0 : 0.0);
 }
 
 void hil_ecu_apply_safe_outputs(hil_ecu_t *ecu,

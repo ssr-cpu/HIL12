@@ -244,7 +244,9 @@ static hil_status_t load_default_signals(hil_signal_registry_t *registry,
         {"fuel_level", "%", 0.0, 100.0, 60.0, 60.0, 60.0, true, false},
         {"oil_pressure", "bar", 0.0, 8.0, 1.2, 1.2, 1.2, true, false},
         {"gear_position", "", 0.0, 8.0, 0.0, 0.0, 0.0, true, false},
-        {"ambient_temp", "degC", -40.0, 80.0, 25.0, 25.0, 25.0, true, false}
+        {"ambient_temp", "degC", -40.0, 80.0, 25.0, 25.0, 25.0, true, false},
+        {"ecu_state", "", 0.0, 6.0, 0.0, 0.0, 0.0, true, false},
+        {"ecu_fault_latched", "", 0.0, 1.0, 0.0, 0.0, 0.0, true, false}
     };
     size_t index;
     for (index = 0U; index < HIL_ARRAY_LEN(defaults); index++) {

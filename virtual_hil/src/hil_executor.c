@@ -195,6 +195,35 @@ static hil_status_t run_step(hil_executor_t *executor,
     case HIL_STEP_FAULT: {
         hil_fault_spec_t spec;
         (void)memset(&spec, 0, sizeof(spec));
+        if (step->ecu_fault != HIL_ECU_FAULT_NONE) {
+            if (step->ecu_fault == HIL_ECU_FAULT_LATCH) {
+                status = hil_ecu_latch_fault(&executor->ecu,
+                                             &executor->time, logger);
+            } else if (step->ecu_fault == HIL_ECU_FAULT_COMM) {
+                status = hil_ecu_set_comm_fault(&executor->ecu, true,
+                                                &executor->time, logger);
+            } else {
+                status = hil_ecu_clear_fault(&executor->ecu, &executor->time,
+                                             logger);
+            }
+            if (status == HIL_OK) {
+                status = hil_ecu_tick(&executor->ecu, &executor->time,
+                                      executor->signals, logger);
+            }
+            (void)snprintf(expected, sizeof(expected), "ECU %s",
+                           hil_ecu_fault_action_name(step->ecu_fault));
+            (void)snprintf(actual, sizeof(actual), "%s latched=%d",
+                           hil_ecu_state_name(executor->ecu.state),
+                           executor->ecu.fault_latched ? 1 : 0);
+            if (status != HIL_OK) {
+                report_status = HIL_REPORT_ERROR;
+                (void)snprintf(message, sizeof(message),
+                               "failed to inject ECU fault");
+            } else {
+                (void)snprintf(message, sizeof(message), "ECU fault injected");
+            }
+            break;
+        }
         (void)strncpy(spec.signal_name, step->target,
                       sizeof(spec.signal_name) - 1U);
         spec.type = step->fault_type;
@@ -265,6 +294,32 @@ static hil_status_t run_step(hil_executor_t *executor,
             (void)snprintf(message, sizeof(message), "reset failed");
         } else {
             (void)snprintf(message, sizeof(message), "system reset");
+        }
+        break;
+    }
+    case HIL_STEP_POWER: {
+        status = step->power_on
+                     ? hil_ecu_power_on(&executor->ecu, &executor->time, logger)
+                     : hil_ecu_power_off(&executor->ecu, &executor->time,
+                                         logger);
+        if (status != HIL_OK) {
+            report_status = HIL_REPORT_ERROR;
+        } else {
+            status = hil_ecu_tick(&executor->ecu, &executor->time,
+                                  executor->signals, logger);
+            if (status != HIL_OK) {
+                report_status = HIL_REPORT_ERROR;
+            }
+        }
+        (void)snprintf(expected, sizeof(expected), "power %s",
+                       step->power_on ? "ON" : "OFF");
+        (void)snprintf(actual, sizeof(actual), "%s",
+                       hil_ecu_state_name(executor->ecu.state));
+        if (status != HIL_OK) {
+            (void)snprintf(message, sizeof(message), "power step failed: %s",
+                           hil_status_name(status));
+        } else {
+            (void)snprintf(message, sizeof(message), "power switched");
         }
         break;
     }

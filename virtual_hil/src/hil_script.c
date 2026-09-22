@@ -4,6 +4,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "hil_ecu.h"
+
+static const char *const ecu_fault_action_names[] = {
+    [HIL_ECU_FAULT_NONE] = "NONE",
+    [HIL_ECU_FAULT_LATCH] = "LATCH",
+    [HIL_ECU_FAULT_COMM] = "COMM",
+    [HIL_ECU_FAULT_CLEAR] = "CLEAR"
+};
+
+const char *hil_ecu_fault_action_name(hil_ecu_fault_action_t action)
+{
+    if (action < HIL_ECU_FAULT_NONE || action > HIL_ECU_FAULT_CLEAR) {
+        return "UNKNOWN";
+    }
+    return ecu_fault_action_names[action];
+}
+
 static const char *const step_type_names[] = {
     [HIL_STEP_NONE] = "NONE",
     [HIL_STEP_TEST] = "TEST",
@@ -12,6 +29,7 @@ static const char *const step_type_names[] = {
     [HIL_STEP_FAULT] = "FAULT",
     [HIL_STEP_ASSERT] = "ASSERT",
     [HIL_STEP_RESET] = "RESET",
+    [HIL_STEP_POWER] = "POWER",
     [HIL_STEP_END] = "END"
 };
 
@@ -238,6 +256,27 @@ static hil_status_t parse_fault(hil_script_t *script, char **tokens,
     }
     (void)strncpy(step.target, tokens[1], sizeof(step.target) - 1U);
     (void)strncpy(step.argument, tokens[2], sizeof(step.argument) - 1U);
+    if (token_equal(step.target, "ECU")) {
+        if (count != 3U) {
+            hil_log_message(logger, HIL_LOG_ERROR, "script",
+                            "line %d: FAULT ECU requires LATCH, COMM or CLEAR",
+                            line);
+            return HIL_ERR_SCRIPT;
+        }
+        if (token_equal(step.argument, "LATCH")) {
+            step.ecu_fault = HIL_ECU_FAULT_LATCH;
+        } else if (token_equal(step.argument, "COMM")) {
+            step.ecu_fault = HIL_ECU_FAULT_COMM;
+        } else if (token_equal(step.argument, "CLEAR")) {
+            step.ecu_fault = HIL_ECU_FAULT_CLEAR;
+        } else {
+            hil_log_message(logger, HIL_LOG_ERROR, "script",
+                            "line %d: unknown ECU fault '%s'", line,
+                            step.argument);
+            return HIL_ERR_SCRIPT;
+        }
+        return hil_script_append_step(script, &step);
+    }
     if (!hil_fault_type_from_name(step.argument, &step.fault_type)) {
         hil_log_message(logger, HIL_LOG_ERROR, "script",
                         "line %d: unknown fault type '%s'", line,
@@ -297,10 +336,15 @@ static hil_status_t parse_assert(hil_script_t *script, char **tokens,
                         step.argument);
         return HIL_ERR_SCRIPT;
     }
-    if (!hil_parse_double(tokens[3], &step.value)) {
-        hil_log_message(logger, HIL_LOG_ERROR, "script",
-                        "line %d: invalid ASSERT expected value", line);
-        return HIL_ERR_SCRIPT;
+    {
+        hil_ecu_state_t expected_state;
+        if (hil_ecu_state_from_name(tokens[3], &expected_state)) {
+            step.value = (double)expected_state;
+        } else if (!hil_parse_double(tokens[3], &step.value)) {
+            hil_log_message(logger, HIL_LOG_ERROR, "script",
+                            "line %d: invalid ASSERT expected value", line);
+            return HIL_ERR_SCRIPT;
+        }
     }
     if (step.assert_op == HIL_ASSERT_BETWEEN) {
         if (count < 5U ||
@@ -338,6 +382,34 @@ static hil_status_t parse_reset(hil_script_t *script, char **tokens,
     (void)memset(&step, 0, sizeof(step));
     step.type = HIL_STEP_RESET;
     step.line = line;
+    return hil_script_append_step(script, &step);
+}
+
+static hil_status_t parse_power(hil_script_t *script, char **tokens,
+                                size_t count, int line,
+                                const hil_logger_t *logger)
+{
+    hil_step_t step;
+    if (count != 2U) {
+        hil_log_message(logger, HIL_LOG_ERROR, "script",
+                        "line %d: POWER requires ON or OFF", line);
+        return HIL_ERR_SCRIPT;
+    }
+    (void)memset(&step, 0, sizeof(step));
+    step.type = HIL_STEP_POWER;
+    step.line = line;
+    if (token_equal(tokens[1], "ON")) {
+        step.power_on = true;
+    } else if (token_equal(tokens[1], "OFF")) {
+        step.power_on = false;
+    } else {
+        hil_log_message(logger, HIL_LOG_ERROR, "script",
+                        "line %d: unknown power state '%s'", line, tokens[1]);
+        return HIL_ERR_SCRIPT;
+    }
+    (void)strncpy(step.target, "ecu", sizeof(step.target) - 1U);
+    (void)strncpy(step.argument, step.power_on ? "ON" : "OFF",
+                  sizeof(step.argument) - 1U);
     return hil_script_append_step(script, &step);
 }
 
@@ -411,6 +483,9 @@ static hil_status_t parse_line(hil_script_t *script, char *line, int line_no,
     }
     if (token_equal(tokens[0], "RESET")) {
         return parse_reset(script, tokens, count, line_no, logger);
+    }
+    if (token_equal(tokens[0], "POWER")) {
+        return parse_power(script, tokens, count, line_no, logger);
     }
     hil_log_message(logger, HIL_LOG_ERROR, "script",
                     "line %d: unknown command '%s'", line_no, tokens[0]);

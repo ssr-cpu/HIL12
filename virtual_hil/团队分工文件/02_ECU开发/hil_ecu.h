@@ -35,6 +35,7 @@ typedef struct hil_ecu {
 } hil_ecu_t;
 
 const char *hil_ecu_state_name(hil_ecu_state_t state);
+bool hil_ecu_state_from_name(const char *name, hil_ecu_state_t *state);
 
 void hil_ecu_init(hil_ecu_t *ecu, const hil_virtual_time_t *time,
                   uint64_t power_on_delay_ms, uint64_t comm_timeout_ms,

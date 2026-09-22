@@ -1,6 +1,7 @@
 #ifndef HIL_SCRIPT_H
 #define HIL_SCRIPT_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "hil_assert.h"
@@ -16,8 +17,16 @@ typedef enum hil_step_type {
     HIL_STEP_FAULT,
     HIL_STEP_ASSERT,
     HIL_STEP_RESET,
+    HIL_STEP_POWER,
     HIL_STEP_END
 } hil_step_type_t;
+
+typedef enum hil_ecu_fault_action {
+    HIL_ECU_FAULT_NONE = 0,
+    HIL_ECU_FAULT_LATCH,
+    HIL_ECU_FAULT_COMM,
+    HIL_ECU_FAULT_CLEAR
+} hil_ecu_fault_action_t;
 
 typedef struct hil_step {
     hil_step_type_t type;
@@ -29,6 +38,8 @@ typedef struct hil_step {
     double tolerance;
     hil_assert_op_t assert_op;
     hil_fault_type_t fault_type;
+    hil_ecu_fault_action_t ecu_fault;
+    bool power_on;
     struct hil_step *next;
 } hil_step_t;
 
@@ -47,6 +58,7 @@ typedef struct hil_script {
 } hil_script_t;
 
 const char *hil_step_type_name(hil_step_type_t type);
+const char *hil_ecu_fault_action_name(hil_ecu_fault_action_t action);
 
 void hil_script_init(hil_script_t *script);
 void hil_script_deinit(hil_script_t *script);

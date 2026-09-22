@@ -42,4 +42,4 @@
 - `script_valid`、`script_unknown_command`、`script_missing_end`、`script_duplicate_case`。
 - `fault_stuck`、`fault_open_circuit`、`fault_remove`。
 - `assert_pass_and_fail`。
-- `executor_end_to_end` 覆盖 12 个端到端用例。
+- `executor_end_to_end` 覆盖 15 个端到端用例；`script_ecu_commands`、`script_ecu_command_invalid`、`executor_ecu_fault_scenarios` 覆盖 `POWER` 与 `FAULT ECU LATCH|COMM|CLEAR`。
