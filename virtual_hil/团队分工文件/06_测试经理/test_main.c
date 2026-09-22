@@ -23,7 +23,7 @@ static int tests_run = 0;
 static int tests_failed = 0;
 static hil_logger_t silent_logger;
 
-#define CHECK(cond)                                                            \ 
+#define CHECK(cond)                                                            \
     do {                                                                       \
         if (!(cond)) {                                                         \
             (void)fprintf(stderr, "FAIL %s:%d: %s\n", __FILE__, __LINE__,      \
